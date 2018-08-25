@@ -1,5 +1,10 @@
+import os
+import uuid
+
 from django.http import HttpResponse
 from django.shortcuts import render
+
+from Movie import settings
 from movieApp.jsondata import Jsondata
 
 # Create your views here.
@@ -16,10 +21,20 @@ def toregist(request):
     password = request.POST.get('password')
     repassword = request.POST.get('repassword')
     email = request.POST.get('email')
-    img = request.POST.get('img')
+    img = request.FILES.get('img')
+    print(img)
+    uuid = getUUID()
+    path = os.path.join(settings.MEDIA_ROOT + '/' + uuid+'.png')
+    path1 = os.path.join(settings.m1+ uuid+'.png')
+    print(path)
+    with open(path, 'wb') as wb:
+        for i in img.chunks():
+            wb.write(i)
+            wb.flush()
+    print(type(img))
 
     member = Member.objects.filter(name=name).first()
-    print(member)
+
     if member:
         return HttpResponse('用户名已存在，请重新注册')
 
@@ -28,7 +43,7 @@ def toregist(request):
         member1.name = name
         member1.password = password
         member1.email = email
-        member1.img = img
+        member1.img = path1
         member1.save()
         return HttpResponse('注册成功')
     else:
@@ -60,7 +75,8 @@ def tologin(request):
     if (member.name ==name) and (member.password ==password):
         request.session['name'] = name
         img = member.img
-        return render(request,'home_logined.html',{'name':name,'img':img})
+        print(type(img))
+        return render(request,'home_logined.html',{'name':name,'path':img})
     else:
         return HttpResponse('用户名或密码错误')
 
@@ -84,6 +100,8 @@ def changeUserInfo(request):
     member.save()
     return HttpResponse('个人信息修改成功')
 
+def getUUID():
+    return str(uuid.uuid4())
 
 
 

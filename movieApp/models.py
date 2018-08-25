@@ -12,3 +12,6 @@ class Member(models.Model):
         db_table ='member'
 
 
+
+
+
